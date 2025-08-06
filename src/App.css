@@ -1,0 +1,902 @@
+:root {
+  --sidebar-width-open: 260px;
+  --sidebar-width-closed: 51px;
+  --transition-speed: 300ms;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: rgb(33, 33, 33);
+  color: #fff;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* Perbaikan transisi sidebar - Smooth transitions sesuai pola yang diminta */
+.sidebar {
+  transition: width var(--transition-speed) ease,
+    background-color var(--transition-speed) ease; /* Transisi width sidebar dan background color */
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 30;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.1);
+  background: rgb(24, 24, 24); /* Default background untuk sidebar terbuka */
+  overflow: hidden;
+  will-change: width;
+}
+
+/* Background sidebar saat tertutup */
+.sidebar.tertutup {
+  background: rgb(33, 33, 33);
+}
+
+.konten-utama {
+  transition: margin-left var(--transition-speed) ease; /* Transisi margin main content */
+  width: 100%;
+}
+
+.teks-sidebar {
+  transition: opacity var(--transition-speed) ease; /* Transisi opacity menu text */
+}
+
+.tombol-sidebar {
+  transition: background-color 0.2s ease; /* Hanya background hover, tanpa layout shift */
+}
+
+/* Reset posisi tombol sidebar - fixed positioning untuk smooth transition */
+.sidebar .menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  position: relative;
+  transition: none; /* Hapus transisi yang menyebabkan pergeseran */
+}
+
+/* Styling untuk tombol sidebar dengan posisi tetap - FIXED seperti icon profile */
+.tombol-sidebar {
+  display: flex;
+  align-items: center;
+  padding: 6px 15px; /* Dikurangi dari 8px 15px untuk efek hover lebih kecil */
+  margin: 4px 0;
+  border-radius: 6px; /* Dikurangi dari 8px untuk lebih proporsional */
+  transition: background-color 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  flex-shrink: 0;
+  width: 100%;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Styling khusus untuk tombol toggle - area klik yang presisi */
+.sidebar-main > div:first-child .tombol-sidebar {
+  height: auto;
+  transition: background-color 0.2s ease;
+  max-width: none;
+  position: relative;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: white;
+  border: none;
+}
+
+
+
+/* Hover effect langsung pada tombol */
+.sidebar-main > div:first-child .tombol-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Pastikan icon toggle berada di posisi yang tepat */
+.sidebar-main > div:first-child .tombol-sidebar svg {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* Hover effect untuk tombol sidebar - kecuali tombol toggle */
+.tombol-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.08); /* Hover effect untuk semua tombol */
+}
+
+
+
+/* Memastikan tombol lain (Obrolan Baru, Cari Obrolan, Profil) tetap memiliki hover penuh */
+.sidebar-fixed-content .tombol-sidebar:hover,
+.sidebar-main > div:last-child .tombol-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Icon positioning - ukuran baru 21x21px */
+.tombol-sidebar svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  min-width: 21px;
+}
+
+/* Text styling - posisi disesuaikan dengan padding baru */
+.teks-sidebar {
+  margin-left: 10px; /* Dikurangi dari 12px untuk menyesuaikan padding baru */
+  white-space: nowrap;
+  transition: opacity var(--transition-speed) ease;
+  font-size: 14px; /* Font size seperti ChatGPT */
+  font-weight: 400; /* Font weight normal */
+}
+
+.sidebar.tertutup .teks-sidebar {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  margin-left: 0;
+}
+
+.sidebar:not(.tertutup) .teks-sidebar {
+  opacity: 1;
+  width: auto;
+}
+
+/* Perbaikan fundamental untuk scrollbar */
+.sidebar .menu {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar .menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Hanya tampilkan scrollbar saat sidebar terbuka DAN ada konten yang overflow */
+.sidebar:not(.tertutup) .menu {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
+}
+
+.sidebar:not(.tertutup) .menu::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+}
+
+.sidebar:not(.tertutup) .menu::-webkit-scrollbar-track {
+  background: #27272a;
+}
+
+.sidebar:not(.tertutup) .menu::-webkit-scrollbar-thumb {
+  background: #52525b;
+  border-radius: 2px;
+}
+
+.sidebar:not(.tertutup) .menu::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Sembunyikan scrollbar secara paksa saat sidebar tertutup */
+.sidebar.tertutup .menu,
+.sidebar.tertutup .menu *,
+.sidebar.tertutup .overflow-y-auto,
+.sidebar.tertutup .scrollbar-thin {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.sidebar.tertutup .menu::-webkit-scrollbar,
+.sidebar.tertutup .menu *::-webkit-scrollbar,
+.sidebar.tertutup .overflow-y-auto::-webkit-scrollbar,
+.sidebar.tertutup .scrollbar-thin::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #27272a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #52525b;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #71717a;
+}
+
+/* Sidebar specific scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-track-zinc-800::-webkit-scrollbar-track {
+  background: #27272a;
+}
+
+.scrollbar-thumb-zinc-600::-webkit-scrollbar-thumb {
+  background: #52525b;
+  border-radius: 2px;
+}
+
+.scrollbar-thumb-zinc-600:hover::-webkit-scrollbar-thumb,
+.hover\:scrollbar-thumb-zinc-500:hover::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+h3 {
+  font-size: 23px !important;
+  margin: 10px 0px;
+}
+
+ol,
+ul {
+  list-style: decimal;
+  margin-left: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+li {
+  list-style: disc;
+}
+
+pre {
+  background-color: #555;
+  padding: 15px;
+  margin: 10px 0px;
+  overflow: auto;
+}
+
+.screen-2 > div.ai p {
+  margin-bottom: 10px;
+}
+
+/* CSS yang sudah dipindahkan ke atas - dihapus untuk menghindari duplikasi */
+
+/* Perbaikan z-index untuk mencegah overlap - sudah dipindah ke atas */
+
+.kotak-input-tetap {
+  z-index: 25 !important;
+  background: rgb(33, 33, 33) !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  background: rgb(33, 33, 33);
+  width: 100%;
+}
+
+.navbar-tetap {
+  z-index: 20 !important;
+  background: rgb(33, 33, 33) !important;
+  background-color: rgb(33, 33, 33) !important;
+  border: none !important;
+}
+
+/* Force override untuk semua child navbar */
+.navbar-tetap * {
+  background: rgb(33, 33, 33) !important;
+}
+
+.navbar-tetap > div {
+  background: rgb(33, 33, 33) !important;
+  background-color: rgb(33, 33, 33) !important;
+}
+
+/* Pastikan input box tidak menimpa sidebar */
+.kotak-input-tetap {
+  transition: left var(--transition-speed) ease;
+  background: rgb(33, 33, 33);
+}
+
+/* Perbaikan untuk menghilangkan celah saat sidebar tertutup */
+.navbar-tetap {
+  transition: left var(--transition-speed) ease;
+  background: rgb(33, 33, 33) !important;
+  border-bottom: none !important;
+}
+
+/* Memastikan tidak ada celah di area konten */
+.konten-utama {
+  background: rgb(33, 33, 33);
+  min-height: 100vh;
+}
+
+/* Sidebar main content area */
+.sidebar-main {
+  transition: width var(--transition-speed) ease;
+}
+
+/* Chat history container styling - sembunyikan scrollbar default */
+.chat-history-container {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+}
+
+.chat-history-container::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Content yang bisa di-scroll */
+.chat-history-content {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  height: 100%;
+  padding-right: 0;
+  scroll-behavior: smooth;
+}
+
+.chat-history-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Integrated scrollbar area - PART OF SIDEBAR */
+.sidebar-scrollbar-area {
+  width: 15px;
+  height: 100%;
+  background: rgb(24, 24, 24); /* Sama dengan sidebar background */
+  transition: opacity var(--transition-speed) ease; /* Sinkron dengan teks */
+  position: relative;
+}
+
+.sidebar-scrollbar-area.tertutup {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.sidebar-scrollbar-area:not(.tertutup) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Custom scrollbar track - INTEGRATED */
+.custom-scrollbar-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+/* Perbaikan margin konten utama untuk memperhitungkan scrollbar */
+.konten-utama {
+  transition: margin-left var(--transition-speed) ease; /* Sinkron dengan sidebar */
+}
+
+/* Segitiga atas di scrollbar track - BIGGER SIZE */
+.custom-scrollbar-track::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 4px 6px 4px; /* Diperbesar kembali ke ukuran original */
+  border-color: transparent transparent #52525b transparent;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* Segitiga bawah di scrollbar track - BIGGER SIZE */
+.custom-scrollbar-track::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 4px 0 4px; /* Diperbesar kembali ke ukuran original */
+  border-color: #52525b transparent transparent transparent;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* Hover effect untuk segitiga */
+.custom-scrollbar-track:hover::before {
+  border-bottom-color: #6b7280;
+  opacity: 1;
+}
+
+.custom-scrollbar-track:hover::after {
+  border-top-color: #6b7280;
+  opacity: 1;
+}
+
+/* Custom scrollbar thumb dengan segitiga seperti ChatGPT - EVEN SMALLER SIZE */
+.custom-scrollbar-thumb {
+  position: absolute;
+  left: 4px;
+  width: 7px; /* Diperkecil lagi dari 9px ke 7px */
+  background: #52525b;
+  border-radius: 3px; /* Diperkecil dari 4px ke 3px */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-height: 12px; /* Diperkecil dari 15px ke 12px */
+  display: none;
+  user-select: none;
+}
+
+.custom-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.custom-scrollbar-thumb:active {
+  background: #71717a;
+  cursor: grabbing;
+}
+
+/* Remove arrow on thumb hover - NO ARROW NEEDED */
+
+/* Remove track color change on hover - NO BACKGROUND CHANGE */
+
+/* Styling untuk input box dengan ukuran 768x104 */
+
+/* Input box untuk halaman awal */
+.input-box-home {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgb(33, 33, 33);
+  padding: 16px 0;
+}
+
+.input-container-home {
+  width: 768px;
+  height: 104px;
+  margin-left: 330px;
+  margin-right: 330px;
+  background-color: transparent;
+  border: 1px solid #52525b;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.input-textarea-home {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  resize: none;
+  padding: 15px;
+  border-radius: 8px;
+  vertical-align: top;
+  text-align: left;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Input box untuk conversation - ChatGPT style */
+.input-container-conversation {
+  width: 768px;
+  min-height: 52px;
+  background-color: rgb(48, 48, 48);
+  border: 1px solid #565869;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0 330px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s ease;
+}
+
+.input-container-conversation:focus-within {
+  border-color: #10a37f;
+  box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+}
+
+.input-textarea-conversation {
+  width: 100%;
+  min-height: 24px;
+  max-height: 200px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+  resize: none;
+  padding: 14px 20px;
+  border-radius: 26px;
+  vertical-align: top;
+  text-align: left;
+  display: block;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.input-textarea-conversation::placeholder {
+  color: #8e8ea0;
+  opacity: 1;
+}
+
+/* Responsive styling untuk layar kecil */
+
+/* Tooltip styling yang sederhana dan mirip ChatGPT */
+
+/* Perbaikan untuk mencegah tooltip mempengaruhi layout */
+.sidebar .menu .relative {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Hover effect yang tidak mengganggu posisi - CONSISTENT */
+.sidebar .tombol-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.08); /* Same as other buttons */
+}
+/* Perbaikan khusus untuk menghilangkan celah sidebar */
+.sidebar {
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Memastikan konten utama tidak memiliki celah */
+.konten-utama {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Perbaikan untuk area yang dikotakin merah */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 1px;
+  height: 100%;
+  background: rgb(63, 63, 70);
+  z-index: 1;
+}
+
+/* Memastikan tidak ada celah di body */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: rgb(33, 33, 33);
+}
+
+/* Perbaikan untuk container utama */
+#root {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: rgb(33, 33, 33);
+}
+/* Layout positioning - CLEAN */
+.sidebar .menu > div {
+  position: relative;
+  width: 100%;
+}
+
+/* Perbaikan khusus untuk header "Chat Terbaru" */
+.sidebar .menu .flex.items-center {
+  min-width: 0;
+  width: 100%;
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.sidebar .menu .flex.items-center span {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0 !important;
+  min-width: fit-content !important;
+  width: auto !important;
+  display: inline-block;
+}
+
+/* Memastikan container "Chat Terbaru" memiliki lebar yang cukup */
+.sidebar:not(.tertutup) .flex.items-center {
+  min-width: 200px;
+  position: static !important;
+}
+
+/* Perbaikan khusus untuk teks "Chat Terbaru" - FIXED positioning */
+.sidebar .chat-terbaru-text {
+  min-width: fit-content !important;
+  width: auto !important;
+  position: static !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
+  margin-left: 10px !important; /* Fixed margin instead of Tailwind class */
+}
+
+/* Container untuk "Obrolan Terbaru" - prevent layout shift */
+.sidebar .obrolan-terbaru-container {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* Perbaikan untuk chat history items agar tidak bergeser */
+.sidebar .chat-history-container .space-y-1 > div {
+  transition: none;
+  position: relative;
+}
+
+/* Sembunyikan item riwayat obrolan saat sidebar ditutup */
+.sidebar.tertutup .chat-history-list > div {
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+  height: 0;
+}
+
+.sidebar .chat-history-container .flex.items-center.justify-between {
+  min-width: 0;
+  width: 100%;
+}
+
+.sidebar .chat-history-container .flex-1.min-w-0 {
+  overflow: hidden;
+}
+
+.sidebar .chat-history-container .text-white.text-sm.font-medium.truncate,
+.sidebar .chat-history-container .text-zinc-400.text-xs {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Memastikan icon clock tidak bergeser */
+.sidebar .menu svg {
+  flex-shrink: 0;
+  min-width: 21px;
+  width: 21px;
+  height: 21px;
+}
+
+/* Perbaikan untuk container px-4 pt-4 */
+.sidebar .menu > div[class*="px-4"] {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Perbaikan untuk mencegah overflow horizontal */
+.sidebar * {
+  box-sizing: border-box;
+}
+
+.sidebar .overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* CSS khusus untuk mencegah line break pada "Chat Terbaru" - FIXED */
+.sidebar .px-4.pt-4 {
+  min-width: 245px;
+  width: 245px;
+  box-sizing: border-box;
+}
+
+.sidebar .px-4.pt-4 .flex.items-center {
+  width: 100%;
+  min-width: 0;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  position: static !important;
+}
+
+/* Perbaikan untuk mencegah pergeseran icon dan teks */
+.sidebar .menu > div {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Perbaikan khusus untuk mencegah bug hover pada tombol sidebar */
+.sidebar .menu > div:hover {
+  transform: none !important;
+  position: relative !important;
+}
+
+/* Memastikan tooltip tidak mempengaruhi layout */
+.sidebar .menu > div > div {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+/* Transisi yang CLEAN - hanya untuk opacity text, BUKAN untuk tombol */
+.teks-sidebar {
+  transition: opacity var(--transition-speed) ease;
+}
+
+/* Tombol tidak boleh ada transisi positioning apapun */
+.tombol-sidebar {
+  transition: background-color 0.2s ease; /* Hanya background color */
+}
+
+/* Styling untuk teks Ctrl+K */
+.ctrl-k-text {
+  font-size: 14px; /* Samakan dengan .teks-sidebar */
+  font-weight: 400; /* Samakan dengan .teks-sidebar */
+  color: rgb(161 161 170); /* Warna dari zinc-400 */
+  position: absolute; /* Untuk positioning absolut */
+  right: 20px; /* Jarak 20px dari kanan */
+  top: 50%; /* Pusatkan secara vertikal */
+  transform: translateY(-50%); /* Koreksi posisi vertikal */
+}
+
+.tombol-pencarian {
+  position: relative; /* Diperlukan agar positioning absolut .ctrl-k-text bekerja */
+}
+
+/* Beri ruang untuk teks Ctrl+K */
+.tombol-pencarian .teks-sidebar {
+  padding-right: 50px; /* Sesuaikan nilai ini jika perlu */
+}
+
+/* Hapus padding saat sidebar ditutup untuk animasi yang mulus */
+.sidebar.tertutup .tombol-pencarian .teks-sidebar {
+  padding-right: 0;
+}
+
+.sidebar .flex {
+  flex-wrap: nowrap !important;
+}
+
+.sidebar .whitespace-nowrap {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+/* Sidebar layout - SIMPLE tanpa konflik */
+.sidebar .menu {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.sidebar .menu > * {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+}
+
+/* Perbaikan untuk sidebar tertutup */
+.sidebar.tertutup .menu > * {
+  width: 51px;
+  min-width: 51px;
+  max-width: 51px;
+  overflow: hidden;
+}
+
+.sidebar.tertutup .tombol-sidebar {
+  width: 100%; /* Tetap 100% untuk konsistensi */
+  margin: 4px 0; /* Sama seperti saat sidebar terbuka, tanpa auto */
+  justify-content: flex-start;
+  padding: 6px 15px;
+}
+
+/* Layout rules - CLEAN VERSION */
+.sidebar .menu > *:hover {
+  transform: none;
+}
+
+.sidebar .menu > * > div {
+  position: static;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sidebar * {
+  box-sizing: border-box;
+}
+
+.sidebar .menu > * > div:first-child {
+  width: 100%;
+  position: static;
+  overflow: visible;
+}
+
+/* Styling untuk teks Ctrl+K - hidden by default, visible on hover */
+.ctrl-k-text {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin-left: 12px !important; /* Add proper spacing */
+}
+
+.tombol-pencarian:hover .ctrl-k-text {
+  opacity: 1;
+}
+
+
+/* Perbaikan final untuk area klik tombol toggle yang presisi - tanpa mengubah posisi */
+.sidebar-main > .flex-shrink-0:first-child {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.sidebar-main > .flex-shrink-0:first-child .tombol-sidebar {
+  width: 51px !important; /* Match sidebar closed width for a full-width hover */
+   height: 33px !important; /* Maintain consistent height */
+   padding: 6px 15px !important; /* 15px horizontal padding to center 21px icon in 51px button */
+   margin: 8px 0 !important; /* Remove horizontal margin */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important; /* Center the icon */
+  border-radius: 6px !important; /* Match other buttons' radius */
+  background: transparent !important;
+  transition: background-color 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.sidebar-main > .flex-shrink-0:first-child .tombol-sidebar:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Memastikan icon berada di tengah */
+.sidebar-main > .flex-shrink-0:first-child .tombol-sidebar svg {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
