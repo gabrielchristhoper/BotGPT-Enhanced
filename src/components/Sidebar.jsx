@@ -116,6 +116,80 @@ const Sidebar = ({
     scrollbarThumb.style.top = `${thumbTop}px`
   }
 
+  // Ref untuk root sidebar
+  const sidebarRef = useRef(null)
+  const wheelMetaRef = useRef({ lastDir: 0, lastTs: 0 })
+  const wheelBehaviorResetRef = useRef(0)
+
+  // Listener wheel native (non-passive) agar bisa preventDefault dan mencegah body scroll
+  useEffect(() => {
+    const sidebarEl = sidebarRef.current
+    if (!sidebarEl) return
+
+    const handleNativeWheel = (e) => {
+      if (!isOpen) return
+
+      const chatHistory = chatHistoryRef.current
+      if (!chatHistory) return
+
+      // Jika kursor berada di dalam area scroll, biarkan browser mengurus scroll (natural)
+      if (chatHistory.contains(e.target)) {
+        return
+      }
+
+      // Di luar area scroll: cegah scroll body dan teruskan delta ke chatHistory
+      e.preventDefault()
+      e.stopPropagation()
+
+      // Normalisasi delta menjadi pixel
+      const basePx = e.deltaMode === 0
+        ? e.deltaY
+        : e.deltaMode === 1
+          ? e.deltaY * 40 // asumsi 40px per line untuk rasa yang natural
+          : e.deltaY * chatHistory.clientHeight
+
+      const now = performance.now()
+      const dir = Math.sign(basePx) || 0
+      const meta = wheelMetaRef.current
+
+      // Booster dinamis: saat bolak-balik cepat, percepat agar tidak terasa tersendat
+      let booster = 1
+      if (dir !== 0 && dir !== meta.lastDir && (now - meta.lastTs) < 160) {
+        booster = 2.6
+      }
+
+      // Pengali kecepatan dasar agar setara dengan native saat di dalam list
+      const OUTSIDE_MULTIPLIER = 5.0
+      let adjusted = basePx * OUTSIDE_MULTIPLIER * booster
+
+      // Pastikan langkah minimal agar tidak terasa "seret" pada delta kecil
+      const minStep = 24
+      if (Math.abs(adjusted) < minStep) {
+        adjusted = (adjusted >= 0 ? 1 : -1) * minStep
+      }
+
+      // Hindari interaksi dengan CSS scroll-behavior: smooth selama scroll dari luar area list
+      const prevBehavior = chatHistory.style.scrollBehavior
+      chatHistory.style.scrollBehavior = 'auto'
+      chatHistory.scrollTop += adjusted
+      if (wheelBehaviorResetRef.current) {
+        clearTimeout(wheelBehaviorResetRef.current)
+      }
+      wheelBehaviorResetRef.current = setTimeout(() => {
+        chatHistory.style.scrollBehavior = prevBehavior || ''
+        wheelBehaviorResetRef.current = 0
+      }, 120)
+
+      meta.lastDir = dir
+      meta.lastTs = now
+    }
+
+    sidebarEl.addEventListener('wheel', handleNativeWheel, { passive: false })
+    return () => {
+      sidebarEl.removeEventListener('wheel', handleNativeWheel)
+    }
+  }, [isOpen])
+
   const handleScrollbarClick = (e) => {
     if (!chatHistoryRef.current || !scrollbarThumbRef.current || !scrollbarTrackRef.current || !isOpen) return
 
@@ -201,6 +275,8 @@ const Sidebar = ({
     document.addEventListener('mouseup', handleMouseUp)
   }
 
+  // (Wheel handler React dihapus; gunakan listener native non-passive di atas)
+
   // Clear cache when needed
   const clearTrackCache = () => {
     trackRectCache.current = null;
@@ -217,28 +293,31 @@ const Sidebar = ({
 
   // Event listeners untuk scroll dan resize
   useEffect(() => {
-    const chatHistory = chatHistoryRef.current;
+    const chatHistoryEl = chatHistoryRef.current;
 
     const handleResize = () => {
       clearTrackCache(); // Clear cache on resize
       updateScrollbar();
     };
 
-    if (chatHistory) {
-      chatHistory.addEventListener('scroll', updateScrollbar);
+    if (chatHistoryEl) {
+      chatHistoryEl.addEventListener('scroll', updateScrollbar);
       window.addEventListener('resize', handleResize);
     }
 
     return () => {
-      if (chatHistory) {
-        chatHistory.removeEventListener('scroll', updateScrollbar);
-        window.removeEventListener('resize', handleResize);
+      if (chatHistoryEl) {
+        chatHistoryEl.removeEventListener('scroll', updateScrollbar);
       }
+      window.removeEventListener('resize', handleResize);
     };
   }, [isOpen]);
 
   return (
-    <div className={`sidebar ${!isOpen ? 'tertutup' : ''} bg-neutral-900 h-screen flex border-r border-zinc-700 overflow-hidden ${isOpen ? 'w-[260px]' : 'w-[51px]'}`}>
+    <div
+      ref={sidebarRef}
+      className={`sidebar ${!isOpen ? 'tertutup' : ''} bg-neutral-900 h-screen flex border-r border-zinc-700 overflow-hidden ${isOpen ? 'w-[260px]' : 'w-[51px]'}`}
+    >
       {/* Main sidebar content */}
       <div className="sidebar-main flex flex-col flex-1" style={{ width: isOpen ? '245px' : '51px' }}>
         {/* Header dengan tombol toggle */}
